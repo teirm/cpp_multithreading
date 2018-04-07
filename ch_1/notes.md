@@ -1,9 +1,7 @@
-*********
-Chapter 1
-*********
+# Chapter 1
 
-Terms
-*****
+## Terms
+
 **Hardware Concurrency**: multiple cores or processors to run tasks
                           different than **task switching**.
 
@@ -14,12 +12,10 @@ Terms
 
 **Data Parallelism**: Divide data and have parallel execution of same task
 
-Includes
-********
+## Includes
 **<thread>**: provides multithreading support for C++11
 
-Notes
-*****
+## Notes
 
 Concurrency can be done with multiple processes; however, there is 
 significant overhead:
