@@ -13,7 +13,7 @@
 **Data Parallelism**: Divide data and have parallel execution of same task
 
 ## Includes
-**<thread>**: provides multithreading support for C++11
+**&lt;thread&gt;**: provides multithreading support for C++11
 
 ## Notes
 
@@ -41,4 +41,4 @@ Every additional threads increases the amount of context switching.  Too
 much can have a detrimental effect on the program.
 
 clang++ -std=c++11 requires the pthread library linked in with -lpthread 
-linked in to use #include <thread>.
+linked in to use #include &lt;thread&gt;.
