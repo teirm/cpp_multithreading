@@ -2,10 +2,15 @@
 
 ## Terms
 
-## Includes
+* Copyable
+* Movable
+* Over subscription
+* Default Constructible 
 
-**&lt;functional&gt;**
-**&lt;iterator&gt;**
+### Includes
+
+* **&lt;functional&gt;**
+* **&lt;iterator&gt;**
 
 ## Notes
 
