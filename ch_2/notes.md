@@ -5,6 +5,7 @@
 ## Includes
 
 **&lt;functional&gt;**
+**&lt;iterator&gt;**
 
 ## Notes
 
@@ -126,3 +127,16 @@ it std::terminate() will be called.
                       given a pointer to a member that will be wrapped.  Stands
                       for "member function".
 
+**Standard Library**: std::bind allows for a function to be created from another
+                      g(x,y) = f(a, y, b, x) where a and b are already defined.
+
+### Thread count at runtime
+True concurrency limit can be determined from std::thread::hardware_concurrency();
+however, 0 can be returned if the information is not available.
+
+
+**Standard Library**: std::advance increments an interator by n.
+
+### Thread Identification
+The type of the identifier is std::thread::id and is accessible by the get_id() 
+member function.  This type has a total ordering and allows for all comparisons.
