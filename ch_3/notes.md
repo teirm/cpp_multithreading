@@ -130,3 +130,37 @@ the entire operation or operations that can modify the data.  However,
 locking at too large a granularity leads to miserable performance due
 to lock contention.
 
+## Deadlock
+**From Modern Operating Systems Ch 6**:
+** The conditions for deadlock are:
+* mutual exclusion - each resource is either assigned or available
+* Hold and wait condition
+* No preemption - resources must be explicitly released
+* Circular wait
+**
+
+Best advice is to always lock in the same order.  C++ provides a fix
+through std::lock -- lock two or more mutexes at once.
+
+Additionally, std::lock_guard can be told to "adopt" the current lock
+-- do not lock it, but take it in its current state -- by using
+the argument std::adopt_lock.  std::lock is an all or nothing.
+
+### Deadlock avoidance guidelines
+
+Fundamentally, don't wait on another thread if it is possible waiting
+for you.
+
+More drastically the following should be considered:
+* Never acquire more than 1 lock
+
+* Avoid calling user code when holding a lock
+
+* Acquire locks in a fixed order -- define an order of traversal.
+
+* Use a locking hierarchy -- divide locks into layers and prevent locking if 
+a lock from a lower layer is already held
+
+Through the use of thread_local variables, a hierarchical mutex is easy to
+implement.  The hierarchy values are stored within the lock as they are 
+acquired and are all thread local.
