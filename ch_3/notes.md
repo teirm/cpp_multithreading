@@ -16,7 +16,7 @@ without the use of locks.
 
 **&lt;mutex&gt;**
 
-**&lt;typetraits&gt;**
+**&lt;type_traits&gt;**
 
 ## Notes
 
@@ -32,11 +32,17 @@ be interrupted.
 
 Example:
 
-        Thread 1            Thread 2
-0       a = x 
-1                           b = x 
-3                           x = b + 1
-4       x = a + 1
+----------------------------------------------
+|        Thread 1     |      Thread 2        |
+----------------------------------------------
+|      a = x          |                      |
+----------------------------------------------
+|                     |    b = x             |
+----------------------------------------------
+|                     |    x = b + 1         |
+----------------------------------------------
+|      x = a + 1      |                      |
+----------------------------------------------
 
 Very often race conditions are difficult to reproduce and isolate.  To 
 avoid race conditions in the first place there are several methods:
