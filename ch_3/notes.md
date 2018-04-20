@@ -33,6 +33,7 @@ be interrupted.
 Example:
 
 |        Thread 1     |      Thread 2        |
+|--------------------------------------------|
 |      a = x          |                      |
 |                     |    b = x             |
 |                     |    x = b + 1         |
