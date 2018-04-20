@@ -33,11 +33,11 @@ be interrupted.
 Example:
 
 |        Thread 1     |      Thread 2        |
-|--------------------------------------------|
-|      a = x          |                      |
-|                     |    b = x             |
-|                     |    x = b + 1         |
-|      x = a + 1      |                      |
+|---------------------|----------------------|
+|      a = x          |    sleep             |
+|      sleep          |    b = x             |
+|      sleep          |    x = b + 1         |
+|      x = a + 1      |    done              |
 
 Very often race conditions are difficult to reproduce and isolate.  To 
 avoid race conditions in the first place there are several methods:
