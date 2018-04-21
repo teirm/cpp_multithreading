@@ -127,8 +127,7 @@ combining pop() and top().  This needs to be done in a multithreaded
 context.
 
 Fundamentally, the issue is lock granularity: locks needs to capture
-the entire operation or operations that can modify the data.  However,
-locking at too large a granularity leads to miserable performance due
+the entire operation or operations that can modify the data.  However, locking at too large a granularity leads to miserable performance due
 to lock contention.
 
 ## Deadlock
@@ -165,3 +164,62 @@ a lock from a lower layer is already held
 Through the use of thread_local variables, a hierarchical mutex is easy to
 implement.  The hierarchy values are stored within the lock as they are 
 acquired and are all thread local.
+
+### Flexible Locking
+
+std::unique_lock gives more flexibility than std::lock_guard.  It does
+not always own the lock.  The lock can be acquired aat a later time by
+passing std::defer_lock.
+
+Since mutex ownership is not required by std::unique_lock, the ownership
+can be transfered between instances.  This can be automatic or be through
+std::move().  It is automatic if the source is an rvalue (temporary).  An
+explicit call to std::move is required if it is an lvalue.  As a result
+std::unique_lock is *movable* but not *copyable*.
+
+An example case is the acquisation of a from a function call followed
+by operations using that lock for protection.
+
+std::unique_lock supports lock / unlock to tune the locking granularity.
+However, care must be taken to avoid changing the meaning of an operation
+or series of operations.
+
+## Alternatives to std::mutex
+
+### Protection only during Initialization
+Lazily initialize objects only when absolutely needed.  Otherwise use 
+an existing instance.
+
+There is the racy double-checked locking:
+
+```c++
+foo()
+{
+    if (!resource) {
+        lock()
+        if (!resource) {
+            create resource;
+        }
+    }
+    resource->do()
+}
+```
+
+This can race between first check and create.  So the call to do might
+use the wrong instance.
+
+A much better way is to use std::call_once and std::once_flag 
+
+In C++11 static variables are initialized once and this is guaranteed 
+to be thread safe.
+
+### Rarely updated structures
+Reader-writer locks...are not in C++11.  They are in the boost standard
+library.  boost::shared_mutex can be used in shared manner and exclusive
+access can be given with std::lock_guard.
+
+### Recursive locking
+I frown upon this, but C++11 does give a std::recursive_mutex.
+
+### Questions:
+Are locks released on thrown exceptions.
