@@ -44,8 +44,18 @@ the criteria for being *mutex like*.
 std::condition_variable_any, being more flexible, incurs 
 slightly higher resource costs than std::condition_variable.
 
-***Note:*** The **explicit** keyword forces the constructor
+***Aside:*** The **explicit** keyword forces the constructor
 to be called and won't create the object otherwise.
+
+The structure of a conditiona variable is:
+
+```c++
+mutable std::mutex mut;
+std::condition_variable my_cond;
+
+std::unique_lock<std::mutex> lk(mut);
+my_cond.wait(lk, []{ return !empty(); });
+```
 
 condition_variable::notify_one will signal one thread to
 check its condition.  The choice of thread is not 
@@ -89,3 +99,30 @@ The | (logical or) of these two allows the
 implementation to decide and is the default.
 
 #### Packaged Task
+std::packaged_task<> ties a future to a function 
+or callable object.
+
+When invoked, it will call the associated callable
+and makes the future ready.  The return value is
+the associated data for the future.
+
+The template paramter defines the function 
+associated with the packaged_task.
+
+```c++
+/* The callable takes a std::string& and
+ * a double*.  int is the type of 
+ * std::future returned.
+ */
+std::packaged_task<int(std::string&, double*)>
+```
+
+An example of how this can be used is covered in the
+book.  This can be viewed as handing work to another
+thread in the form of a std::packaged_task.  The 
+caller gets the associated std::future.  This allows
+the work to be done in another thread and lets the
+caller get the information when the future is ready.
+Alternatively, the caller can just ignore the future.
+
+#### Promises
