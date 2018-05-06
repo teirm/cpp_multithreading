@@ -6,6 +6,7 @@
 
 ***lt&;condition_variablegt&;***
 ***lt&;futuregt&;***
+***lt&;chronogt&;***
 
 ## Notes
 
@@ -126,3 +127,132 @@ caller get the information when the future is ready.
 Alternatively, the caller can just ignore the future.
 
 #### Promises
+Provides a way to set a value of type T that is 
+readable through an associated std::future<T>.
+A waiting thread can block on the future while
+the providing thread can use the promise to set
+the value.
+
+To get the future associated with the std::promise,
+use std::promise::get_future().  The future becomes
+ready after the value is set in the promise using
+std::promise::set_value().  If the std::promise
+is destroyed withou a value set, an exception
+is stored instead.
+
+**Note**: clang++ did *not* throw an error
+when compiling a program using promises 
+withouth -lpthread.  The executable then threw a 
+std::system_error.
+
+#### Dealing with exceptions in the future
+**Note**: std::current_exception retrieves
+the currently thrown exception.
+
+An exception throwns as part std::async gets
+rethrown when std::future::get is called. 
+std::promise does the same thing.
+
+**Note**: the standard does not specify if
+the exception rethrown is a copy or the 
+original.
+
+If a std::packaged_task or a std::promise
+is destoried without setting a value, the
+result will be std::future_error.
+
+#### Synchronizing Multiple Threads
+Lack of synchronization with std::future and 
+multiple threads creates a data race and is
+undefined.  Additionally, std::future::get 
+is a one shot operation -- after the first call
+there is nothing else.  So, the first thread
+to make the get() call will get the results.
+
+std::shared_future solves this problem by
+being a *copyable* future, whereas std::future
+is only *movable*.  Access is still not
+synchronized and requires locking; however, the
+problem of undefined behavior will not occur.
+(The locking problem can also be solved by having
+each thread take a copy of the shared future 
+instead of referencing the same instance.)
+
+Creating a shared_future from a regular future 
+can be done, but invalidates that future. This 
+is because the future is moved. For example:
+```c++
+std::promize<std::string> p;
+/* std::move is implicit for rvalues */
+std::shared_future<std::string> sf(p.get_future()); 
+```
+
+The transfer of ownership can also be accomplished
+using std::future::share().
+
+### Timed wait
+Timeouts come in two differents forms:
+* durations - normally have a _for suffix
+* absolute  - have a _until suffix
+
+#### Clocks in C++
+Clocks in C++ have four pieces of information:
+* curren time
+* time data type
+* tick period
+* steady tick or not
+
+A note on steady ticking: most clocks are not steady
+since steady is defined at ticking at uniform rate and 
+*not being adjustable*.  The standard library provides 
+std::chrono:steady_clock if necessary.
+
+Additionally, if high precision is needed there is a 
+std::chrono::high_resolution_clock.
+
+#### Durations
+Given by std::chrono::duration<> template.  The template
+specifies the representation and how many seconds each
+duration unit represents.
+
+Note conversion of durations is implicit when there is 
+no truncation:
+* hours -> seconds OK
+* seconds -> hours NOT OK
+
+There is a std::chrono::duration_cast<> for the purpose
+of explicit converstions; however, the result is truncated
+instead of being rounded.
+
+To use a duration wait, use future::wait_for and see if 
+after the timeout the result is std::future_status::ready.
+
+#### Time Point
+Provided by instances of std::chrono::time_point<>.
+
+Gives the length of time in multiples of a templated
+duration since an *epoch* of the clock.  Can be useful
+for timing blocks of code.
+
+The clock parameter specifies the epoch of the timepoint
+but is also used to determine when the wait should return.
+If the parameter is modified, this can impact the total
+wait time.
+
+These are used with the _until suffix type waits.  When 
+used with a condition variable, a loop should be wrapping
+the check for spurious wakeups.  Using wait_for() in this
+case can lead to an unbounded waittime if you miss the 
+exact time.
+
+#### Alarms
+You can make a thread sleep_for() or sleep_until() a 
+certain time.
+
+These can also be used with locks to try to acquire a 
+lock for a duration.
+
+## Simplifying Code with Synchronization
+
+The techniques described with futures and promises are
+very amenable to a functional programming style.

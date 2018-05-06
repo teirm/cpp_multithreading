@@ -11,8 +11,8 @@ public:
     Animal(std::string name) { this->name = name; }
     virtual ~Animal() {}
     virtual void setName(std::string s) { this->name = s; }
-    virtual void speak() { std::cout << "Generic Animal" << std::endl; } 
     virtual std::string getName() const { return this->name; }
+    virtual void speak() { std::cout << "Generic Animal" << std::endl; } 
 private:
     std::string name;
 };
