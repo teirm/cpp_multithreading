@@ -48,7 +48,7 @@ slightly higher resource costs than std::condition_variable.
 ***Aside:*** The **explicit** keyword forces the constructor
 to be called and won't create the object otherwise.
 
-The structure of a conditiona variable is:
+The structure of a conditional variable is:
 
 ```c++
 mutable std::mutex mut;
@@ -137,12 +137,12 @@ To get the future associated with the std::promise,
 use std::promise::get_future().  The future becomes
 ready after the value is set in the promise using
 std::promise::set_value().  If the std::promise
-is destroyed withou a value set, an exception
+is destroyed without a value set, an exception
 is stored instead.
 
 **Note**: clang++ did *not* throw an error
 when compiling a program using promises 
-withouth -lpthread.  The executable then threw a 
+without -lpthread.  The executable then threw a 
 std::system_error.
 
 #### Dealing with exceptions in the future
@@ -191,7 +191,7 @@ The transfer of ownership can also be accomplished
 using std::future::share().
 
 ### Timed wait
-Timeouts come in two differents forms:
+Timeouts come in two different forms:
 * durations - normally have a _for suffix
 * absolute  - have a _until suffix
 
@@ -221,7 +221,7 @@ no truncation:
 * seconds -> hours NOT OK
 
 There is a std::chrono::duration_cast<> for the purpose
-of explicit converstions; however, the result is truncated
+of explicit conversions; however, the result is truncated
 instead of being rounded.
 
 To use a duration wait, use future::wait_for and see if 
@@ -242,7 +242,7 @@ wait time.
 These are used with the _until suffix type waits.  When 
 used with a condition variable, a loop should be wrapping
 the check for spurious wakeups.  Using wait_for() in this
-case can lead to an unbounded waittime if you miss the 
+case can lead to an unbounded wait time if you miss the 
 exact time.
 
 #### Alarms
@@ -256,3 +256,28 @@ lock for a duration.
 
 The techniques described with futures and promises are
 very amenable to a functional programming style.
+
+Functional programming is when the function call
+depends only on the parameters.  It is a great 
+simplification when concurrency in involved.
+
+Futures are critical since they allow for dependencies
+between computations without explicit access to shared
+data.
+
+Listing 4.12 and 4.14 are good examples of using 
+functional C++ style and using futures within this 
+style.
+
+### Message Passing for Synchronization
+*See the book Communicating sequential process by
+C.A.R Hoare*
+
+If there is no shared data, each thread can be 
+viewed as independent and as as state machine that 
+updates state based upon the messages received and
+how they modify the current state.
+
+In C++ all threads share an address space, so true
+CSP is not possible.  It requires that there is 
+absolute no shared data.
