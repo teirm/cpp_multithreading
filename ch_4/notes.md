@@ -92,7 +92,7 @@ run.  They can be in a separate thread or run
 synchronously when waited on. This can be controlled
 with additional arguments:
 * std::launch:async - forces the task to be run in a
-seprate thread
+separate thread
 * std::launch::deferred - call is deferred until 
 wait() or get() is called on the future.
 
@@ -107,7 +107,7 @@ When invoked, it will call the associated callable
 and makes the future ready.  The return value is
 the associated data for the future.
 
-The template paramter defines the function 
+The template parameter defines the function 
 associated with the packaged_task.
 
 ```c++
@@ -149,7 +149,7 @@ std::system_error.
 **Note**: std::current_exception retrieves
 the currently thrown exception.
 
-An exception throwns as part std::async gets
+Exceptions thrown as part std::async gets
 rethrown when std::future::get is called. 
 std::promise does the same thing.
 
@@ -158,7 +158,7 @@ the exception rethrown is a copy or the
 original.
 
 If a std::packaged_task or a std::promise
-is destoried without setting a value, the
+is destroyed without setting a value, the
 result will be std::future_error.
 
 #### Synchronizing Multiple Threads
@@ -197,7 +197,7 @@ Timeouts come in two different forms:
 
 #### Clocks in C++
 Clocks in C++ have four pieces of information:
-* curren time
+* current time
 * time data type
 * tick period
 * steady tick or not
@@ -280,4 +280,4 @@ how they modify the current state.
 
 In C++ all threads share an address space, so true
 CSP is not possible.  It requires that there is 
-absolute no shared data.
+absolutely no shared data.
