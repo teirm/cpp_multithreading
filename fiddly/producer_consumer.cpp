@@ -22,8 +22,10 @@ void processing_thread()
     while(input_values.empty() == false) {
         value = input_values.front();
         input_values.pop();
-        std::lock_guard<std::mutex> lk(queue_lock);
-        processed_values.push(value*3);
+        {
+            std::lock_guard<std::mutex> lk(queue_lock);
+            processed_values.push(value*3);
+        }
         processed_cond.notify_one();
     }
     done = true;
