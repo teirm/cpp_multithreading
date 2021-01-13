@@ -36,7 +36,9 @@ void consuming_thread()
     while (done == false || !processed_values.empty()) {
         std::unique_lock<std::mutex> lk(queue_lock);
         processed_cond.wait(lk, []{return (!processed_values.empty() || done); });
-        sum += processed_values.front();
+        if (!processed_values.empty()) {
+            sum += processed_values.front();
+        }
         processed_values.pop();
         lk.unlock();
     }
