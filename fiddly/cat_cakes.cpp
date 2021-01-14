@@ -54,14 +54,16 @@ void Bakery::process_orders()
         std::unique_lock<std::mutex> lk(order_lock_);
         if (cake_orders_.empty()) {
             /* no orders to process so go to sleep */
-            order_cond_.wait(lk, [this]{ return !cake_orders_.empty(); });
+            order_cond_.wait(lk, [this]{ return open_; });
         }
-        std::promise<int> cake_order(std::move(cake_orders_.front()));
-        // "Bake" the cake by setting a value
-        cake_order.set_value(1);
-        cake_orders_.pop();
-        
+        if (!cake_orders_.empty()) {
+            std::promise<int> cake_order(std::move(cake_orders_.front()));
+            // "Bake" the cake by setting a value
+            cake_order.set_value(1);
+            cake_orders_.pop();
+        }
         lk.unlock();
+        
     }
 }
 
@@ -97,7 +99,6 @@ void Cat::be_a_cat(Bakery &bakery)
     }
     
     std::cout << name_ << " ate too many cakes and exploded!" << std::endl;
-
 }
 
 std::future<int> Cat::place_order(Bakery &bakery)
@@ -135,6 +136,8 @@ int main()
     for (auto &thread : cat_threads) {
         thread.join();
     }
+
+    cat_cake_bakery.close();
 
     bakery_thread.join();
 }
