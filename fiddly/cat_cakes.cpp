@@ -21,7 +21,7 @@ public:
     Bakery():open_(true) { }
     ~Bakery() { }
     std::future<int> take_order();
-    void close() { open_ = false; }
+    void close() { std::unique_lock<std::mutex> lk(order_lock_); open_ = false; order_cond_.notify_one(); }
     void operate() { process_orders(); }
 private:
     void process_orders();
@@ -54,16 +54,14 @@ void Bakery::process_orders()
         std::unique_lock<std::mutex> lk(order_lock_);
         if (cake_orders_.empty()) {
             /* no orders to process so go to sleep */
-            order_cond_.wait(lk, [this]{ return open_; });
-        }
-        if (!cake_orders_.empty()) {
+            order_cond_.wait(lk, [this]{ return !cake_orders_.empty() || !open_; });
+        } else {
             std::promise<int> cake_order(std::move(cake_orders_.front()));
             // "Bake" the cake by setting a value
             cake_order.set_value(1);
             cake_orders_.pop();
         }
         lk.unlock();
-        
     }
 }
 
