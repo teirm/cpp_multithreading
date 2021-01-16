@@ -89,12 +89,14 @@ void Logger::stop_logger()
     return;
 }
 
+
+// print a long entry
 void Logger::print_entry(const LogEntry &entry) 
 {
-    std::cout << "Name:  " << entry.name << " " 
-              << "Event: " << entry.message << " "
-              << "Time: "  << std::put_time(std::localtime(&entry.time), "%F %T") << std::endl;
-
+    std::cout << "Time:  "  << std::put_time(std::localtime(&entry.time), "%F %T") << std::endl 
+              << "Name:  " << entry.name << std::endl 
+              << "Event: " << entry.message << std::endl 
+              << std::endl; 
 }
 
 class Bakery {
@@ -116,6 +118,7 @@ private:
     std::queue<std::promise<int>> cake_orders_;
 };
 
+// Log an entry for the bakery
 void Bakery::log_entry(std::string message)
 {
     LogEntry entry{"bakery", message, 0};
@@ -145,19 +148,27 @@ std::future<int> Bakery::take_order()
 // Process cake orders that have been sent by cats
 void Bakery::process_orders()
 {
+    int total_cakes = 0;
+
     while (open_) {
         std::unique_lock<std::mutex> lk(order_lock_);
         if (cake_orders_.empty()) {
-            /* no orders to process so go to sleep */
+            // no orders to process so go to sleep
             order_cond_.wait(lk, [this]{ return !cake_orders_.empty() || !open_; });
         } else {
             std::promise<int> cake_order(std::move(cake_orders_.front()));
             // "Bake" the cake by setting a value
+            log_entry("baked a cake");
             cake_order.set_value(1);
+            total_cakes++;
             cake_orders_.pop();
         }
         lk.unlock();
     }
+
+    std::ostringstream oss;
+    oss << "Total Cakes Baked: " << total_cakes;
+    log_entry(oss.str());
 }
 
 class Cat {
@@ -181,6 +192,8 @@ private:
     int nap_time_;
 };
 
+// Log a message for a cat using its name and
+// the even that occured
 void Cat::log_entry(std::string message)
 {
     LogEntry entry{name_, message, 0};
@@ -209,18 +222,23 @@ void Cat::operator()(Bakery &bakery)
     log_entry("ate too many cakes and exploded!");
 }
 
-
+// place an order at the bakery. the bakery returns
+// a future and handles the promise to make the cake
 std::future<int> Cat::place_order(Bakery &bakery)
 {
     return bakery.take_order();
 }
 
-
+// cat eats a cake it received from the bakery
+//
+// It might need to wait for the cake before eating it
 void Cat::eat_cake(std::future<int> &&cake_order)
 {
     capacity_ -= cake_order.get();
 }
 
+
+// cats nap for some period of time and then wake up
 void Cat::nap()
 {
     std::chrono::seconds nap_time(nap_time_);
@@ -229,29 +247,41 @@ void Cat::nap()
 
 int main()
 {
-    Logger logger(5);
-
+    constexpr int logger_delay = 5;
+    Logger logger(logger_delay);
+    
+    // std::thread takes a reference to a callable
+    // object
     std::thread logger_thread(std::ref(logger));
-
+    
+    // create the bakery
+    Bakery cat_cake_bakery(logger);
+    std::thread bakery_thread(std::ref(cat_cake_bakery));
+    
+    // create all the cats
     std::vector<Cat> cats{{"Fluffy", 3, 4, logger},
                           {"Choo-Choo", 2, 3, logger},
                           {"Chonko", 4, 5, logger}};
 
-    Bakery cat_cake_bakery(logger);
     
+    // create a vector of cat threads
     std::vector<std::thread> cat_threads;
     for (auto &cat : cats) {
+        // reference arguments must be passed by std::ref
+        // can't pass a non-const rvalue 
         cat_threads.push_back(std::thread(cat, std::ref(cat_cake_bakery)));
     }
     
-    std::thread bakery_thread(std::ref(cat_cake_bakery));
-
-    for (auto &thread : cat_threads) {
-        thread.join();
+    // join cat threads as the cats explode
+    for (auto &cat_thread : cat_threads) {
+        cat_thread.join();
     }
-
+    
+    // close the bakery
     cat_cake_bakery.close();
     bakery_thread.join();
+
+    // stop logging
     logger.stop_logger();
     logger_thread.join();
 }
