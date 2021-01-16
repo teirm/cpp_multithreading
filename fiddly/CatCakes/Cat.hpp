@@ -30,8 +30,8 @@ private:
     void nap();
     void log_entry(std::string message);
 
-    Logger &logger_;
     std::string name_;
     int capacity_;
     int nap_time_;
+    Logger &logger_;
 };

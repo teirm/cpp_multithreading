@@ -26,7 +26,7 @@ void Cat::operator()(Bakery &bakery)
 {
     while (capacity_ > 0 ) {
         log_entry("is being a cat");
-        std::future<int> cake_order(std::move(place_order(bakery)));    
+        std::future<int> cake_order(place_order(bakery));    
         
         log_entry("ordered a cake");
         eat_cake(std::move(cake_order));
