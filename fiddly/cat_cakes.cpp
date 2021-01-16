@@ -89,7 +89,6 @@ void Logger::stop_logger()
     return;
 }
 
-
 // print a long entry
 void Logger::print_entry(const LogEntry &entry) 
 {
@@ -236,7 +235,6 @@ void Cat::eat_cake(std::future<int> &&cake_order)
 {
     capacity_ -= cake_order.get();
 }
-
 
 // cats nap for some period of time and then wake up
 void Cat::nap()
