@@ -15,7 +15,8 @@
 
 int main()
 {
-    Logger logger;
+    constexpr size_t flush_size = 5; 
+    Logger logger(flush_size);
     
     // std::thread takes a reference to a callable
     // object

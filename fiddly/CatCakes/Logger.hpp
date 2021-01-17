@@ -26,18 +26,19 @@ struct LogEntry {
 
 class Logger {
     public:
-    Logger():
-        running_(true) {}
+    Logger(int flush_size):
+        running_(true),
+        flush_size_(flush_size) {}
     ~Logger() { }
     void operator()();
     void push_entry(LogEntry entry);
     void stop_logger();
 private:
-    bool running_;
-
-    void print_entry(const LogEntry &entry);
-
+    bool    running_;
+    size_t  flush_size_;
     std::mutex log_lock_;
     std::condition_variable log_cond_;
     std::queue<LogEntry> log_queue_;
+    
+    void print_entry(const LogEntry &entry);
 };

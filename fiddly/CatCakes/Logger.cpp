@@ -7,14 +7,15 @@
 #include <iomanip>
 #include <iostream>
 
-using namespace std::chrono_literals;
-
 void Logger::operator()()
 {
     std::unique_lock<std::mutex> lk(log_lock_);
     while (running_) {
         if (log_queue_.empty()) {
-           log_cond_.wait(lk, [this]{return !log_queue_.empty() || !running_;});
+            // only start displaying log messages if there are 
+            // more than flush_size_ log messages in the queue
+            // otherwise let them accumulate.
+            log_cond_.wait(lk, [this]{return log_queue_.size() > flush_size_ || !running_;});
         } 
         if (running_ == false) {
             break;
