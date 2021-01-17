@@ -26,15 +26,13 @@ struct LogEntry {
 
 class Logger {
     public:
-    Logger(int delay):
-        delay_(delay),
+    Logger():
         running_(true) {}
     ~Logger() { }
     void operator()();
     void push_entry(LogEntry entry);
     void stop_logger();
 private:
-    int delay_;
     bool running_;
 
     void print_entry(const LogEntry &entry);

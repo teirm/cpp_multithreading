@@ -11,20 +11,21 @@ using namespace std::chrono_literals;
 
 void Logger::operator()()
 {
+    std::unique_lock<std::mutex> lk(log_lock_);
     while (running_) {
-        std::unique_lock<std::mutex> lk(log_lock_);
         if (log_queue_.empty()) {
-            log_cond_.wait_for(lk, delay_*1s, [this]{return !log_queue_.empty() || !running_;});
-        } else {
-            auto log_entry = log_queue_.front();
-            log_queue_.pop();
-            print_entry(log_entry);
+           log_cond_.wait(lk, [this]{return !log_queue_.empty() || !running_;});
+        } 
+        if (running_ == false) {
+            break;
         }
+        auto log_entry = log_queue_.front();
+        log_queue_.pop();
         lk.unlock();
+        print_entry(log_entry);
+        lk.lock();
     }
 
-    // flush the log queue before terminating
-    std::unique_lock<std::mutex> lk(log_lock_);
     while (!log_queue_.empty()) {
         auto log_entry = log_queue_.front();
         log_queue_.pop();
@@ -34,12 +35,12 @@ void Logger::operator()()
 
 void Logger::push_entry(LogEntry entry)
 {
+    std::lock_guard<std::mutex> lk(log_lock_);
     if (running_ == false) {
         // drop any messages that are pushed after the logger has stopped running
         return;
     }
     
-    std::unique_lock<std::mutex> lk(log_lock_);
     log_queue_.push(entry);
     log_cond_.notify_one();
     return;
@@ -47,7 +48,7 @@ void Logger::push_entry(LogEntry entry)
 
 void Logger::stop_logger()
 {
-    std::unique_lock<std::mutex> lk(log_lock_);
+    std::lock_guard<std::mutex> lk(log_lock_);
     running_ = false;
     log_cond_.notify_one();
     return;

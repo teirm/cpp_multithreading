@@ -13,11 +13,9 @@
 #include "Bakery.hpp"
 #include "Logger.hpp"
 
-
 int main()
 {
-    constexpr int logger_delay = 5;
-    Logger logger(logger_delay);
+    Logger logger;
     
     // std::thread takes a reference to a callable
     // object
@@ -31,7 +29,6 @@ int main()
     std::vector<Cat> cats{{"Fluffy", 3, 4, logger},
                           {"Choo-Choo", 2, 3, logger},
                           {"Chonko", 4, 5, logger}};
-
     
     // create a vector of cat threads
     std::vector<std::thread> cat_threads;
