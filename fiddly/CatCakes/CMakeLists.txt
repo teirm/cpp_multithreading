@@ -40,6 +40,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Werror")
 
+# force all these cache variables so that they are always set
+# on Cmake builds
 # add asan flags
 set(CMAKE_C_FLAGS_ASAN              "-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_ASAN            "-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope" CACHE STRING "" FORCE)
